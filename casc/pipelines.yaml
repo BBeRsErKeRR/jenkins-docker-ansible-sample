@@ -1,0 +1,11 @@
+jobs:
+  - script: >
+      pipelineJob('example_run_job') {
+        definition {
+          cps {
+            script('''@Library('testingLibrary') _
+              TestBadEnv()'''.stripIndent())
+            sandbox()
+          }
+        }
+      }

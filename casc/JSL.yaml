@@ -1,0 +1,10 @@
+unclassified:
+  globalLibraries:
+    libraries:
+      - defaultVersion: master
+        name: "testingLibrary"
+        retriever:
+          modernSCM:
+            scm:
+              git:
+                remote: "file:///var/lib/jenkins/shared-library.git"

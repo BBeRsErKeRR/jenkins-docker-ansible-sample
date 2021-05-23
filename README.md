@@ -1,1 +1,0 @@
-# jenkins-docker-ansible-sample

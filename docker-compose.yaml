@@ -1,0 +1,18 @@
+version: "2.3"
+
+services:
+  jenkins-dev-server:
+    image: jenkins-dev-server:lts
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 8085:8080
+      - 50000:50000
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - ./.build:/var/lib/jenkins
+    env_file:
+      - env_jenkins
+volumes:
+  jenkins_home:

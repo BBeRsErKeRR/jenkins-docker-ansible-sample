@@ -1,0 +1,2 @@
+JAVA_OPTS= -Dfile.encoding=UTF8 -Djenkins.install.runSetupWizard=false -Dpermissive-script-security.enabled=no_security -Djava.util.logging.config.file=/var/jenkins_home/log.properties
+MEMORY_ARGS= -Xmn128M -Xms512M -Xmx1g
