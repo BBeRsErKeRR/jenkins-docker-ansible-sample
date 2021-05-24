@@ -4,4 +4,7 @@
   tasks:
     - shell:
         cmd: "printenv"
+        
+    - shell:
+        cmd: "printenv"
       environment: "{{ ansible_env }}"
