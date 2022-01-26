@@ -3,6 +3,10 @@ VPATH = .build
 
 .PHONY:
 SHELL=/bin/bash
+SHELLOPTS:=$(if $(SHELLOPTS),$(SHELLOPTS):)pipefail:errexit
+
+DOCKER_BUILDKIT=1
+COMPOSE_DOCKER_CLI_BUILD=1
 
 #Set vars
 CUR_DIR := $(shell pwd)
@@ -13,8 +17,12 @@ SLAVE_WORKDIR := $(shell echo ${CUR_DIR}/slave)
 GIT_USER := $(shell git config --global user.name)
 CURRENT_USER := $(shell whoami)
 EXTERNAL_USER := $(shell id -u):$(shell id -g)
+BASE_IMAGE=$(shell grep -ioP '(?<=^from)\s+\S+' Dockerfile | head -n 1 | cut -d ' ' -f 2)
+AGENT_BASE_IMAGE=$(shell grep -ioP '(?<=^from)\s+\S+' dind_agent/Dockerfile | head -n 1 | cut -d ' ' -f 2)
 
 export
+
+
 
 #Print help message
 help: ## get help

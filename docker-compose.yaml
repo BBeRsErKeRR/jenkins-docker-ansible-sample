@@ -1,4 +1,4 @@
-version: "2.3"
+version: "3.6"
 
 services:
   jenkins-dev-server:
@@ -6,13 +6,59 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
+      cache_from:
+        - ${BASE_IMAGE}
+        - jenkins-dev-server:lts
     ports:
-      - 8085:8080
+      - ${CONTROLLER_PORT:-8085}:8080
       - 50000:50000
     volumes:
       - jenkins_home:/var/jenkins_home
       - ./.build:/var/lib/jenkins
     env_file:
       - env_jenkins
+    networks:
+      - jenkins_network
+  jenkins-dev-slave:
+    image: "jenkins-dev-slave:lts"
+    build:
+      dockerfile: Dockerfile
+      context: dind_agent/
+      cache_from:
+        - ${AGENT_BASE_IMAGE}
+    tty: true
+    environment:
+      JENKINS_AGENT_NAME: "dev-jnlp"
+      JENKINS_URL: "http://jenkins-dev-server:8080"
+      JENKINS_SECRET: ${SECRET_TOKEN}
+      DOCKER_HOST: tcp://dind-node:2375
+    depends_on:
+      - dind-node
+      - jenkins-dev-server
+    volumes:
+      - slave-home:/home/jenkins
+    networks:
+      - dind_network
+      - jenkins_network
+  dind-node:
+    image: docker:20.10-dind
+    tty: true
+    networks:
+      - dind_network
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    command: --storage-driver overlay2
+    volumes:
+      - slave-home:/home/jenkins
+      - dind-graph:/var/lib/docker
 volumes:
   jenkins_home:
+  dind-graph:
+  slave-home:
+networks:
+  dind_network:
+  jenkins_network:
+secrets:
+  ssh_private_key:
+    file: ~/.ssh/id_rsa

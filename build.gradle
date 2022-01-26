@@ -1,0 +1,194 @@
+plugins {
+    id 'java'
+//    id 'idea'
+    id 'codenarc'
+    id 'groovy'
+//    id 'maven'
+//    id 'jacoco'
+//    id 'com.mkobit.jenkins.pipelines.shared-library' version '0.10.1'
+}
+
+//idea {
+//    module {
+//        downloadJavadoc = true
+//        downloadSources = true
+//    }
+//}
+//
+//sourceCompatibility = 1.8
+
+
+sourceSets {
+
+    main {
+        groovy {
+            srcDir 'src/groovy'
+        }
+    }
+
+    job_dsl {
+        groovy {
+            srcDir 'job_dsl/jobs'
+            srcDir 'job_dsl/templates'
+        }
+
+//        resources {
+//            srcDir 'src/job_dsl/resources'
+//        }
+
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+
+    shared_library {
+        groovy {
+            srcDir 'shared-library/src'
+            srcDir 'shared-library/vars'
+        }
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+
+//    test {
+//        groovy {
+//            srcDirs = ['shared-library/test']
+//        }
+//    }
+}
+
+compileGroovy {
+    groovyOptions.configurationScript = file("gradle/config.groovy")
+    groovyOptions.encoding = 'UTF-8'
+}
+
+codenarc {
+    toolVersion = "1.2.1"
+    ignoreFailures = false
+    configFile = file('codenarc/codenarcRules.groovy')
+    //reportFormat = 'html'
+    maxPriority2Violations = 140
+    maxPriority3Violations = 500
+}
+
+codenarcTest {
+    reports {
+        console { enabled = true } // I've added it here but nothing has changed
+        html {
+            enabled = true
+            destination = new File("build/reports/codenarc/codenarc.html")
+        }
+    }
+}
+
+codenarcMain {
+    reports {
+        console { enabled = true } // I've added it here but nothing has changed
+        html {
+            enabled = true
+            destination = new File("build/reports/codenarc/codenarc.html")
+        }
+    }
+}
+//jacoco {
+//    toolVersion = '0.8.1'
+//}
+//
+//jacocoTestReport {
+//    reports {
+//        xml.enabled true
+//        html.enabled true
+//        html.destination file("${buildDir}/reports/coverage")
+//    }
+//}
+//
+//jacocoTestCoverageVerification {
+//    violationRules {
+//        rule {
+//            limit {
+//                minimum = 0.83
+//            }
+//        }
+//    }
+//}
+//
+//
+//task libs(type: Copy) {
+//    into 'lib'
+//    from('./') {
+//        include 'src/**/*'
+//        include 'vars/**/*'
+//    }
+//}
+//
+//test.dependsOn libs
+//
+//task resolveTestPlugins(type: Copy) {
+//    from configurations.testPlugins
+//    into new File(sourceSets.test.output.resourcesDir, 'test-dependencies')
+//    include '*.hpi'
+//    include '*.jpi'
+//    def mapping = [:]
+//
+//    doFirst {
+//        configurations.testPlugins.resolvedConfiguration.resolvedArtifacts.each {
+//            mapping[it.file.name] = "${it.name}.${it.extension}"
+//        }
+//    }
+//    rename { mapping[it] }
+//
+//    doLast {
+//        List<String> baseNames = source*.name.collect { mapping[it] }.collect { it[0..it.lastIndexOf('.') - 1] }
+//        new File(destinationDir, 'index').setText(baseNames.join('\n'), 'UTF-8')
+//    }
+//}
+//
+//test {
+//    dependsOn tasks.resolveTestPlugins
+//
+//    inputs.files sourceSets.jobs.groovy.srcDirs
+//    systemProperty 'buildDirectory', project.buildDir.absolutePath
+//}
+//
+//
+//
+task printSourceSetInformation() {
+
+    doLast {
+        sourceSets.each { srcSet ->
+            println "[" + srcSet.name + "]"
+            print "-->Source directories: " + srcSet.allJava.srcDirs + "\n"
+            print "-->Resources directories: " + srcSet.resources.srcDirs + "\n"
+            print "-->Output directories: " + srcSet.output.classesDirs.files + "\n"
+            print "-->Compile classpath: " + srcSet.compileClasspath.files.size().toString() + "\n"
+            println ""
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.apache.ivy:ivy:2.5.0'
+    implementation group: 'org.jenkins-ci.main', name: 'jenkins-core', version: '2.289.3', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'script-security', version: '1.77', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'jackson2-api', version: '2.12.3', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'cloudbees-folder', version: '6.15', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'hidden-parameter', version: '0.0.4', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'readonly-parameters', version: '1.0.0'
+    implementation group: 'org.jenkins-ci.plugins', name: 'extended-choice-parameter', version: '0.82', ext: 'jar'
+    implementation group: 'io.jenkins', name: 'configuration-as-code', version: '1.51', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'pipeline-utility-steps', version: '2.8.0', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'ansicolor', version: '1.0.0', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'job-dsl', version: '1.78.1', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins.workflow', name: 'workflow-api', version: '2.44', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins.workflow', name: 'workflow-step-api', version: '2.23', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins.workflow', name: 'workflow-cps', version: '2.92', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins.workflow', name: 'workflow-support', version: '3.8', ext: 'jar'
+    implementation group: 'org.jenkins-ci.plugins', name: 'job-dsl-core', version: '1.78.1', ext: 'jar'
+    implementation "org.codehaus.groovy:groovy-all:3.0.8"
+    testImplementation 'com.lesfurets:jenkins-pipeline-unit:1.9'
+    implementation group: 'com.cloudbees', name: 'groovy-cps', version: '1.32', ext: 'jar'
+}
+
+//jacocoTestCoverageVerification.dependsOn jacocoTestReport
+//check.dependsOn jacocoTestCoverageVerification
+
+defaultTasks 'check'
